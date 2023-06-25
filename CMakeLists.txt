@@ -3,7 +3,7 @@ project(cpu_usage_tracker VERSION 0.1.0 LANGUAGES C)
 
 include(CTest)
 enable_testing()
-add_executable(cpu_usage_tracker main.c)
+add_executable(cpu_usage_tracker main.c source/analyzer.c source/reader.c)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
