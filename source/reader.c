@@ -1,5 +1,6 @@
 #include "../header/reader.h"
 #include <unistd.h>
+#include <stdint.h>
 #include <semaphore.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -7,17 +8,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <time.h>
-struct threads_data{
-    pthread_mutex_t lock;
-    sem_t semaphore;
-    int reader_analyzer[2];
-    int analyzer_printer[2];
-};
+#include "../header/globals.h"
 
 int lines_to_read()
 { 
-    int lines;
-    char ch ;
+    int lines = 0;
+    char ch;
     FILE* fp= fopen("/proc/stat", "r");
     if(fp == NULL)
       {
@@ -30,54 +26,66 @@ int lines_to_read()
             lines++;
     fclose(fp); 
 
-
 return lines;
 }
 
 void *read_data(void* thread_data1)
 { 
   struct threads_data *thread_data = (struct threads_data*)thread_data1;
+    
     while(1)
+
     {
+      
     size_t k=0;
-    int num_cores = lines_to_read()-7;
-    char* line1[num_cores];
-    int size = sizeof(&line1);
-    memset(line1,0,sizeof(line1));
-   char* line;
+    unsigned int core_numbers =(uintptr_t)thread_data->number_of_cores;
+
+    char* array_data_lines[core_numbers];
+    int size = sizeof(&array_data_lines);
+    memset(array_data_lines,0,sizeof(array_data_lines));
             FILE* fp= fopen("/proc/stat", "r");
-    int i=0;
-   
-        for(int z =0; z<num_cores;z++)
+   sem_wait(&thread_data->anazyler_read_ready);
+     sem_post(&thread_data->reader_send_ready);
+
+
+
+//   MERGE FOR LOOPS?
+        for(int core =0; core<core_numbers;core++)
         {
 
-      
-      getline(&line1[i], &k , fp);
+      if(getline(&array_data_lines[core], &k , fp)<0)
+      {
+        free(array_data_lines[core]);
+        array_data_lines[core]=NULL;
+      }
      
-      i++;
         }
-      int ch=1;
 
      fclose(fp);
-      sem_post(&thread_data->semaphore);
+      sem_post(&thread_data->reader_send_ready);
 
-  for(int i=0; i<num_cores;i++)
+  for(int core=0; core<core_numbers;core++)
   {
      
-     if(strstr(line1[i],"intr"))
-     {break;}
-     printf("g %s %ld",line1[i],sizeof(&line1));
-          int result = write(thread_data->reader_analyzer[1],line1[i] ,192);
-printf("WYSYLANIE  %d",result);
-           
+     if(strstr(array_data_lines[core],"intr"))
+     {break;
 
+     }
+ 
+           write(thread_data->reader_analyzer[1],array_data_lines[core] ,70);
+
+        free(array_data_lines[core]);   
+    array_data_lines[core]=NULL;
   }
+    
+        
+
 
  sleep(1);
-        
-    
-
-    }
       
-  printf("thread reader end");
+
+    } 
+
+    return NULL;
+      
 }
