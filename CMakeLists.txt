@@ -3,9 +3,10 @@ project(cpu_usage_tracker VERSION 0.1.0 LANGUAGES C)
 
 include(CTest)
 enable_testing()
-
-add_executable(cpu_usage_tracker main.c source/reader.c source/analyzer.c)
-
+find_package(Curses REQUIRED)
+include_directories(${CURSES_INCLUDE_DIR})
+add_executable(cpu_usage_tracker main.c source/reader.c source/analyzer.c source/printer.c)
+target_link_libraries(cpu_usage_tracker ${CURSES_LIBRARIES})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

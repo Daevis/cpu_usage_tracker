@@ -2,6 +2,9 @@
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "files.associations": {
         "printer.h": "c",
-        "semap1hore.h": "c"
+        "semap1hore.h": "c",
+        "globals.h": "c",
+        "reader.h": "c",
+        "time.h": "c"
     }
 }
