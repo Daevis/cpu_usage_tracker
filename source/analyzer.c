@@ -1,38 +1,15 @@
 #include <unistd.h>
-#include <semaphore.h>
-#include <stdio.h>
-#include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
-#include <pthread.h>
-#include <time.h>
-#include <stdint.h>
 #include "../header/analyzer.h"
 #include "../header/globals.h"
 
-enum cpu_data {
-    core_id=0,
-    user=1,
-    cpu_nice=2,
-    cpu_system=3,
-    idle=4,
-    iowait=5,
-    irq=6,
-    softir=7,
-    steal=8,
-    guest=9,
-    guest_nice=10
-}cpu_enum;
-
-enum prev_data{
-   prev_total=0,
-   prev_idle=1,
-}prev_data;
 
 void* analyze(void* thread_dataPtr)
-{
+{   
+
     struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
-    unsigned int core_numbers=(uintptr_t)thread_data->number_of_cores;
+    unsigned int core_numbers=(unsigned int)thread_data->number_of_cores;
     char received_data[core_numbers][70];
     long prev_data[core_numbers][2];
     memset(prev_data, 0, sizeof(prev_data)); 
@@ -40,18 +17,18 @@ void* analyze(void* thread_dataPtr)
     char read_buffer[70];
 
     while(1){
-    
+
         sem_wait(&thread_data->reader_send_ready);
     
-        for(int core=0; core<core_numbers; core++){
-            int result = read(thread_data->reader_analyzer[0],&read_buffer,70);
+        for(unsigned int core=0; core<core_numbers; core++){
+            read(thread_data->reader_analyzer[0],&read_buffer,70);
 
-            for (int z = 0; z < 70; z++){ // 70 ? !!!!!!!!!!!!!!!!!!!!
+            for (int z = 0; z < 70; z++){ 
                received_data[core][z]=read_buffer[z];
             }
         }
 
-        for(int core=0; core<core_numbers; core++){
+        for(unsigned int core=0; core<core_numbers; core++){
 
             char * param;
             param= strtok((char*)received_data[core]," ");
@@ -62,11 +39,11 @@ void* analyze(void* thread_dataPtr)
                 param=strtok(NULL, " ");
             }
         }
-
-        sem_wait(&thread_data->printer_read_ready);
+        
         sem_post(&thread_data->analyzer_write_ready);
-
-        for(int core=0;core<core_numbers;core++){
+        sem_wait(&thread_data->printer_read_ready);
+        
+        for(unsigned int core=0;core<core_numbers;core++){
 
             long cpu_idle = data_chars_array[core][idle]+data_chars_array[core][iowait];
             long nonidle = data_chars_array[core][user]+data_chars_array[core][cpu_nice]+
@@ -78,12 +55,15 @@ void* analyze(void* thread_dataPtr)
             long idled = cpu_idle - prev_data[core][prev_idle];
 
             if(prev_data[core][prev_idle]!=0 && prev_data[core][prev_total]!=0){
-                float cpu_usage = (float)((totald-idled)*100)/totald;
-                int result=write(thread_data->analyzer_printer[1],&cpu_usage ,4);
+                float cpu_usage = (float)((totald-idled)*100)/(float)totald;
+                write(thread_data->analyzer_printer[1],&cpu_usage ,4);
             }
             prev_data[core][prev_idle]=cpu_idle;
             prev_data[core][prev_total]=total;
         }
+                thread_data->watch(1);
+        sleep(1);
         sem_post(&thread_data->anazyler_read_ready);
+        
     }
 }

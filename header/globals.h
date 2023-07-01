@@ -1,3 +1,8 @@
+#ifndef GLOBALS_H
+#define GLOBALS_H
+#include <semaphore.h>
+
+#define THREADS_NUMBER 4
 struct threads_data{
     sem_t reader_send_ready;
     sem_t anazyler_read_ready;
@@ -5,5 +10,12 @@ struct threads_data{
     sem_t printer_read_ready;
     int reader_analyzer[2];
     int analyzer_printer[2];
-    int number_of_cores;
+    unsigned int number_of_cores;
+    int* (*watch)(int);
 };
+
+
+void * watchdog(void*);
+int* watch(int);
+
+#endif
