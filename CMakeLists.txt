@@ -8,7 +8,7 @@ elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
 endif()
 
 include(CTest)
-
+set(CMAKE_C_FLAGS "-std=c18")
 enable_testing()
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})

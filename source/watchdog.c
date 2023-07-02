@@ -13,17 +13,18 @@
 
 #include "../header/globals.h"
 
-void* watchdog(void*)
+void* watchdog(void* thread_dataPtr)
 {
     //struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
     int* threads_status;
     threads_status=watch(THREADS_NUMBER+1);
+    struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
 
-    while(1){
+    while(thread_data->kill != 1){
 
         sleep(2);
         for(int id = 0; id < THREADS_NUMBER-1; id++){
-            if(threads_status[id]==0){
+            if(threads_status[id] == 0 && thread_data->kill != 1){
                 char* stuck_thread = "Stuck";
                 switch (id){
                     case 0: {
@@ -48,6 +49,7 @@ void* watchdog(void*)
             threads_status[id]=0;
         }
     }
+    return 0;
 }
 
 int* watch(int thread_id)

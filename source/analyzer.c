@@ -16,7 +16,7 @@ void* analyze(void* thread_dataPtr){
     char read_buffer[70];
     char * param;
 
-    while(1){
+    while(thread_data->kill != 1){
 
         sem_wait(&thread_data->reader_send_ready);
     
@@ -67,6 +67,6 @@ void* analyze(void* thread_dataPtr){
         thread_data->watch(1);
         sleep(1);
         sem_post(&thread_data->anazyler_read_ready);
-        
     }
+    return 0;
 }

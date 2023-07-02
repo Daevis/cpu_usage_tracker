@@ -12,6 +12,7 @@ struct threads_data{
     int analyzer_printer[2];
     unsigned int number_of_cores;
     int* (*watch)(int);
+    int kill;
 };
 
 

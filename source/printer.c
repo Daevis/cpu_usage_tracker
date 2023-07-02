@@ -11,7 +11,7 @@ void* printer_gui(void* thread_dataPtr){
   unsigned int core_numbers = (unsigned int)thread_data->number_of_cores;
   float read1_buffer[core_numbers];
 
-  while(1){
+  while(thread_data->kill != 1){
 
     #ifdef PRINT_CORES_USAGE
     int parent_x, parent_y, new_x, new_y;
@@ -53,6 +53,7 @@ void* printer_gui(void* thread_dataPtr){
 
     cpu = cpu/(float)core_numbers;
     thread_data->watch(2);
+    
     printf("\rAverage cpu usage = %.2f %%",cpu);
     fflush(stdout);
     
@@ -63,5 +64,5 @@ void* printer_gui(void* thread_dataPtr){
     wrefresh(gui);
     #endif
   }
-  
+  return 0;
 }
