@@ -18,4 +18,6 @@ struct threads_data{
 void * watchdog(void*);
 int* watch(int);
 
+void logger(char *);
+
 #endif

@@ -39,7 +39,10 @@ void* watchdog(void*)
                         break;
                     }
                 }
-                printf("Program terminated \n Result = stuck thread %s", stuck_thread);
+                char message[] = "Program terminated \nResult = stuck thread ";
+                strcat(message, stuck_thread );
+                logger(message);
+                printf("%s", message);
                 exit(0);
             }
             threads_status[id]=0;
