@@ -42,6 +42,10 @@ int main(){
       logger("printer read init failed");
       return 1;
    }
+   if(sem_init(&thread_data.send_log,0,0) != 0){
+      logger("printer read init failed");
+      return 1;
+   }
    
    pipe(thread_data.reader_analyzer);
    pipe(thread_data.analyzer_printer);
@@ -51,7 +55,9 @@ int main(){
    pthread_create(&thread_id[1], NULL, analyze, &thread_data);
    pthread_create(&thread_id[2], NULL, printer_gui, &thread_data);
    pthread_create(&thread_id[3], NULL, watchdog, &thread_data);
-   logger("Threads, semaphores and pipes created");
+   pthread_create(&thread_id[4], NULL, logger, &thread_data);
+
+   //logger("Threads, semaphores and pipes created");
 
    while (!done){
       unsigned int t = sleep(3); 
@@ -64,6 +70,7 @@ int main(){
          pthread_join(thread_id[1],NULL);
          
          pthread_join(thread_id[3],NULL);
+         pthread_join(thread_id[4],NULL);
          pthread_cancel(thread_id[2]);
          pthread_join(thread_id[2],NULL);
       }

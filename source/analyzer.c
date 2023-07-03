@@ -24,7 +24,7 @@ void* analyze(void* thread_dataPtr){
         for(unsigned int core = 0; core < core_numbers; core++){
             long result = read(thread_data->reader_analyzer[0], &read_buffer,70);
             if(result == -1){
-                logger("Error with reading data from reader");
+                thread_data->message = "Error with reading data from reader";
             }
 
             for (int z = 0; z < 70; z++){ 
@@ -57,7 +57,9 @@ void* analyze(void* thread_dataPtr){
                 float cpu_usage = (float)((totald-idled)*100)/(float)totald;
                 long result = write(thread_data->analyzer_printer[1],&cpu_usage, 4);
                 if(result == -1){
-                    logger("Error with sending data to printer");
+                    sem_post(&thread_data->send_log);
+
+                    thread_data->message = "Error with sending data to printer";
                 }
             }
             prev_data[core][prev_idle] = cpu_idle;

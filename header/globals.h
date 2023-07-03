@@ -8,17 +8,19 @@ struct threads_data{
     sem_t anazyler_read_ready;
     sem_t analyzer_write_ready;
     sem_t printer_read_ready;
+    sem_t send_log;
     int reader_analyzer[2];
     int analyzer_printer[2];
     unsigned int number_of_cores;
     int* (*watch)(int);
     int kill;
+    char* message;
 };
 
 void term(int);
-void * watchdog(void*);
+void* watchdog(void*);
 int* watch(int);
 
-void logger(char *);
+void* logger(void *);
 
 #endif

@@ -36,10 +36,13 @@ void* printer_gui(void* thread_dataPtr){
     
     float cpu = 0;
     for(unsigned int core = 0; core < core_numbers; core++){
+
       long result = read(thread_data->analyzer_printer[0],&read1_buffer[core],4);
       if(result == -1){
-        logger("Error with reading data from analyzer");
+        sem_post(&thread_data->send_log);
+        thread_data->message = "Error with reading data from analyzer";
       }
+     
       #ifdef PRINT_CORES_USAGE
       mvwprintw(gui, core, 1, "core = ");
       mvwprintw(gui, core, 8, "%d",core);
@@ -56,7 +59,8 @@ void* printer_gui(void* thread_dataPtr){
     
     printf("\rAverage cpu usage = %.2f %%", (double)cpu);
     fflush(stdout);
-    
+    sem_post(&thread_data->send_log);
+    thread_data->message = "No errors";
     #ifdef PRINT_CORES_USAGE
     mvwprintw(gui, 0, 1, "Average cpu usage = ");
     mvwprintw(gui, 0, 21, "%.2f",(double)cpu);

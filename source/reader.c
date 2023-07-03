@@ -7,15 +7,13 @@
 #include "reader.h"
 #define NON_CPU_LINES 7
 
-extern unsigned int lines_to_read(){
+unsigned int lines_to_read(){
 
   unsigned int lines = 0;
   char ch;
   FILE* fp= fopen("/proc/stat", "r");
   if(fp == NULL){
-    logger("Error with opening /proc/stat file");
-    printf("Error!");   
-    exit(1);             
+    return -1;           
   }
 
   for (ch = getc(fp); ch != EOF; ch=getc(fp)){
@@ -61,7 +59,7 @@ void *read_data(void* thread_dataPtr){
 
       long result = write(thread_data->reader_analyzer[1],array_data_lines[core] ,70);
       if(result == -1){
-        logger("Error with sending data to analyzer");
+        thread_data->message = "Error with sending data to analyzer";
       }
 
       free(array_data_lines[core]);   
