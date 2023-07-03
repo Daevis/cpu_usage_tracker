@@ -1,14 +1,14 @@
 #include <unistd.h>
 #include <ncurses.h>
 
-#include "../header/globals.h"
-#include "../header/printer.h"
+#include "globals.h"
+#include "printer.h"
 
 
 void* printer_gui(void* thread_dataPtr){
 
   struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
-  unsigned int core_numbers = (unsigned int)thread_data->number_of_cores;
+  unsigned int core_numbers = (unsigned int)thread_data->number_of_cores - 1;
   float read1_buffer[core_numbers];
 
   while(thread_data->kill != 1){
@@ -34,9 +34,9 @@ void* printer_gui(void* thread_dataPtr){
     sem_wait(&thread_data->analyzer_write_ready);
     sem_post(&thread_data->printer_read_ready);
     
-    float cpu=0;
+    float cpu = 0;
     for(unsigned int core = 0; core < core_numbers; core++){
-      int result = read(thread_data->analyzer_printer[0],&read1_buffer[core],4);
+      long result = read(thread_data->analyzer_printer[0],&read1_buffer[core],4);
       if(result == -1){
         logger("Error with reading data from analyzer");
       }
@@ -54,7 +54,7 @@ void* printer_gui(void* thread_dataPtr){
     cpu = cpu/(float)core_numbers;
     thread_data->watch(2);
     
-    printf("\rAverage cpu usage = %.2f %%",cpu);
+    printf("\rAverage cpu usage = %.2f %%", (double)cpu);
     fflush(stdout);
     
     #ifdef PRINT_CORES_USAGE

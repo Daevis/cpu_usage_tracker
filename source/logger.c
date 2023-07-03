@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../header/globals.h"
+#include "globals.h"
 #include <time.h>
 
 void logger(char* str_log){

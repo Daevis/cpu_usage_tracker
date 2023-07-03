@@ -15,7 +15,7 @@ struct threads_data{
     int kill;
 };
 
-
+void term(int);
 void * watchdog(void*);
 int* watch(int);
 

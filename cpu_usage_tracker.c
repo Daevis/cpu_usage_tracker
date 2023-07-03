@@ -4,16 +4,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <signal.h>
-#include "header/analyzer.h"
-#include "header/printer.h"
-#include "header/reader.h"
-#include "header/globals.h"
+#include "analyzer.h"
+#include "printer.h"
+#include "reader.h"
+#include "globals.h"
 
-#define NON_CPU_LINES 7
 volatile sig_atomic_t done = 0;
  
 void term(int signum){
-    done = 1;
+   done = signum;
 }
 
 int main(){
@@ -22,10 +21,8 @@ int main(){
    action.sa_handler = term;
    sigaction(SIGTERM, &action, NULL);
    
-   int loop = 0;
-   
    pthread_t thread_id[THREADS_NUMBER];
-   unsigned int cores = lines_to_read() - NON_CPU_LINES;
+   unsigned int cores = lines_to_read();
    struct threads_data thread_data;
    thread_data.number_of_cores=cores;
    thread_data.kill = 0;
@@ -57,7 +54,7 @@ int main(){
    logger("Threads, semaphores and pipes created");
 
    while (!done){
-      int t = sleep(3); 
+      unsigned int t = sleep(3); 
       
       while (t > 0){
          logger("Received SIGTERM signal");

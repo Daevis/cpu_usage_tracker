@@ -1,9 +1,10 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
-#include "../header/analyzer.h"
-#include "../header/globals.h"
+#include "analyzer.h"
+#include "globals.h"
 
+#define CPU_PARAMETERS 11
 
 void* analyze(void* thread_dataPtr){
 
@@ -12,7 +13,7 @@ void* analyze(void* thread_dataPtr){
     char received_data[core_numbers][70];
     long prev_data[core_numbers][2];
     memset(prev_data, 0, sizeof(prev_data)); 
-    int data_chars_array[core_numbers][11];
+    int data_chars_array[core_numbers][CPU_PARAMETERS];
     char read_buffer[70];
     char * param;
 
@@ -20,8 +21,8 @@ void* analyze(void* thread_dataPtr){
 
         sem_wait(&thread_data->reader_send_ready);
     
-        for(unsigned int core=0; core<core_numbers; core++){
-            int result = read(thread_data->reader_analyzer[0],&read_buffer,70);
+        for(unsigned int core = 0; core < core_numbers; core++){
+            long result = read(thread_data->reader_analyzer[0], &read_buffer,70);
             if(result == -1){
                 logger("Error with reading data from reader");
             }
@@ -30,38 +31,37 @@ void* analyze(void* thread_dataPtr){
                received_data[core][z]=read_buffer[z];
             }
 
-            param= strtok((char*)received_data[core]," ");
+            param = strtok((char*)received_data[core]," ");
 
-            for(int param_id=0; param!=NULL;param_id++){
+            for(int param_id = 0; param != NULL; param_id++){
 
-                data_chars_array[core][param_id]=atoi(param);
-                param=strtok(NULL, " ");
+                data_chars_array[core][param_id] = atoi(param);
+                param = strtok(NULL, " ");
             }
         }
                 
         sem_post(&thread_data->analyzer_write_ready);
         sem_wait(&thread_data->printer_read_ready);
         
-        for(unsigned int core=0;core<core_numbers;core++){
+        for(unsigned int core = 1; core < core_numbers; core++){
 
-            long cpu_idle = data_chars_array[core][idle]+data_chars_array[core][iowait];
-            long nonidle = data_chars_array[core][user]+data_chars_array[core][cpu_nice]+
-            data_chars_array[core][cpu_system]+data_chars_array[core][irq]+
-            data_chars_array[core][softir]+data_chars_array[core][steal];
+            long cpu_idle = data_chars_array[core][idle] + data_chars_array[core][iowait];
+            long nonidle = data_chars_array[core][user] + data_chars_array[core][cpu_nice] +
+            data_chars_array[core][cpu_system] + data_chars_array[core][irq] +
+            data_chars_array[core][softir] + data_chars_array[core][steal];
 
             long total = cpu_idle + nonidle;
             long totald = total - prev_data[core][prev_total];
             long idled = cpu_idle - prev_data[core][prev_idle];
-
             if(prev_data[core][prev_idle]!=0 && prev_data[core][prev_total]!=0){
                 float cpu_usage = (float)((totald-idled)*100)/(float)totald;
-                int result = write(thread_data->analyzer_printer[1],&cpu_usage ,4);
+                long result = write(thread_data->analyzer_printer[1],&cpu_usage, 4);
                 if(result == -1){
                     logger("Error with sending data to printer");
                 }
             }
-            prev_data[core][prev_idle]=cpu_idle;
-            prev_data[core][prev_total]=total;
+            prev_data[core][prev_idle] = cpu_idle;
+            prev_data[core][prev_total] = total;
         }
 
         thread_data->watch(1);
