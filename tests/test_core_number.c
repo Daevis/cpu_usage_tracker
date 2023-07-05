@@ -6,12 +6,12 @@
 
 int main()
 {
-    unsigned int cpu_num_reader = lines_to_read() - 1;
+    unsigned int cpu_num_reader = cpu_number() - 1;
     printf("This system has %d processors configured and "
         "%d processors available.\n",
         get_nprocs_conf(), get_nprocs());
 
-    unsigned int test_cpu_num = get_nprocs_conf();
-    assert(cpu_num_reader==test_cpu_num);
+    unsigned int test_cpu_num = (unsigned int)get_nprocs_conf();
+    assert(cpu_num_reader == test_cpu_num);
     return 0;
 }

@@ -19,6 +19,4 @@ find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 add_executable(cpu_usage_tracker cpu_usage_tracker.c)
 target_link_libraries(cpu_usage_tracker ${CURSES_LIBRARIES} CUT_lib)
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+

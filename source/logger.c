@@ -3,13 +3,22 @@
 #include "globals.h"
 #include <time.h>
 
+/**
+ * @brief Logger thread
+ * 
+ * This function is a thread that logs 
+ * some error events
+ * 
+ * @param thread_dataPtr struct of shared variables between threads
+ * @return void* 
+ */
 void* logger(void* thread_dataPtr){
     
     struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
 
     while(thread_data->kill != 1){
 
-        thread_data->watch(3);
+        thread_data->alive_sign(3);
         sem_wait(&thread_data->send_log);
         if(!strstr(thread_data->message, "No errors")){
         FILE* flog= fopen("log.txt", "a");

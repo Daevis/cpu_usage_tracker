@@ -1,6 +1,8 @@
 #ifndef ANALYZER_H
 #define ANALYZER_H
 
+#define CPU_PARAMETERS 11
+#define PREV_PARAMS 2
 enum cpuData {
     core_id=0,
     user=1,
