@@ -23,7 +23,7 @@ void* analyze(void* thread_dataPtr){
     memset(prev_data, 0, sizeof(prev_data)); 
     int data_chars_array[core_numbers][CPU_PARAMETERS];
     char read_buffer[READ_BUFFER];
-    char * param;
+    char* param;
 
     while(thread_data->kill != 1){
 

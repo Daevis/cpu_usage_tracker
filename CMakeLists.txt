@@ -9,7 +9,7 @@ endif()
 
 include(CTest)
 set(CMAKE_C_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED On)
+set(CMAKE_C_STANDARD_REQUIRED On)
 
 enable_testing()
 add_subdirectory(tests)

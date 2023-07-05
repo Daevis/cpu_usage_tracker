@@ -49,6 +49,7 @@ char* read_file(FILE* fp){
     free(data_line);
     data_line = NULL;
   }
+
   return data_line;
 }
 
@@ -90,6 +91,7 @@ void *read_data(void* thread_dataPtr){
       free(array_data_lines[core]);   
       array_data_lines[core] = NULL;
     }
+
     fclose(fp);
     thread_data->alive_sign(0);
     sem_post(&thread_data->reader_send_ready);

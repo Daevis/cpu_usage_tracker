@@ -24,45 +24,66 @@ void term(int signum){
 }
 
 int main(){
+
    struct sigaction action;
    memset(&action, 0, sizeof(struct sigaction));
    action.sa_handler = term;
    sigaction(SIGTERM, &action, NULL);
-   
    pthread_t thread_id[THREADS_NUMBER];
    unsigned int cores = cpu_number();
    struct threads_data thread_data;
    thread_data.number_of_cores=cores;
    thread_data.kill = 0;
+   thread_data.alive_sign = &alive_sign;  
+
    if(sem_init(&thread_data.reader_send_ready,0,0) != 0){
-      logger("reader_send_ready init failed");
+      printf("reader_send_ready init failed");
       return 1;
    }
    if(sem_init(&thread_data.anazyler_read_ready,0,1) != 0){
-      logger("anazyler_read_ready init failed");
+      printf("anazyler_read_ready init failed");
       return 1;
    }
    if(sem_init(&thread_data.analyzer_write_ready,0,0) != 0){
-      logger("analyzer write init failed");
+      printf("analyzer write init failed");
       return 1;
    }
    if(sem_init(&thread_data.printer_read_ready,0,1) != 0){
-      logger("printer read init failed");
+      printf("printer read init failed");
       return 1;
    }
    if(sem_init(&thread_data.send_log,0,0) != 0){
-      logger("printer read init failed");
+      printf("printer read init failed");
       return 1;
    }
-   
-   pipe(thread_data.reader_analyzer);
-   pipe(thread_data.analyzer_printer);
-   thread_data.alive_sign = &alive_sign;  
-   pthread_create(&thread_id[0], NULL, read_data, &thread_data);
-   pthread_create(&thread_id[1], NULL, analyze, &thread_data);
-   pthread_create(&thread_id[2], NULL, printer_gui, &thread_data);
-   pthread_create(&thread_id[3], NULL, watchdog, &thread_data);
-   pthread_create(&thread_id[4], NULL, logger, &thread_data);
+   if(pipe(thread_data.reader_analyzer) != 0){
+      printf("pipe reader_analyzer init failed");
+      return 1;
+   }
+   if(pipe(thread_data.analyzer_printer) != 0){
+      printf("pipe analyzer_printer init failed");
+      return 1;
+   }
+   if(pthread_create(&thread_id[0], NULL, read_data, &thread_data) != 0){
+      printf("thread reader init failed");
+      return 1;
+   }
+   if(pthread_create(&thread_id[1], NULL, analyze, &thread_data) != 0){
+      printf("thread analyzer init failed");
+      return 1;
+   }
+   if(pthread_create(&thread_id[2], NULL, printer_gui, &thread_data) != 0){
+      printf("thread printer init failed");
+      return 1;
+   }
+   if(pthread_create(&thread_id[3], NULL, watchdog, &thread_data) != 0){
+      printf("thread watchdog init failed");
+      return 1;
+   }
+   if(pthread_create(&thread_id[4], NULL, logger, &thread_data) != 0){
+      printf("thread printf init failed");
+      return 1;
+   }
 
    while (!done){
       unsigned int t = sleep(3); 
@@ -72,5 +93,5 @@ int main(){
          thread_data.kill = 1;
       }
    }
-   return 0;
+   return 1;
 }

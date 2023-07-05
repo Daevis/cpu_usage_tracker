@@ -26,8 +26,9 @@ void* watchdog(void* thread_dataPtr){
     struct threads_data *thread_data = (struct threads_data*)thread_dataPtr;
  
     while(thread_data->kill != 1){
-
+        
         sleep(2);
+        
         for(int id = 0; id < THREADS_NUMBER - 1; id++){
             if(threads_status[id] == 0 && thread_data->kill != 1){
                 char* stuck_thread = " ";
@@ -49,6 +50,7 @@ void* watchdog(void* thread_dataPtr){
                         break;
                     }
                 }
+
                 char message[] = "Program terminated \nResult = stuck thread ";
                 strcat(message, stuck_thread );
                 thread_data->message = message;
